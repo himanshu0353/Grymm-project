@@ -1,3 +1,22 @@
+# Environment
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+.DS_Store
+
 # Python
 __pycache__/
 *.py[cod]
@@ -22,13 +41,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Virtual Environments
-venv/
-env/
-ENV/
-.venv/
-.env/
-
 # Django
 *.log
 local_settings.py
@@ -36,7 +48,7 @@ db.sqlite3
 db.sqlite3-journal
 media/
 
-# Flutter (if not using nested gitignore)
+# Flutter
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -44,8 +56,5 @@ media/
 .pub-cache/
 .pub/
 /build/
-
-# IDEs
-.vscode/
-.idea/
-*.iml
+/.dart_tool/
+/.packages

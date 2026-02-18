@@ -16,7 +16,12 @@ class SendOTPView(APIView):
         
         otp = generate_otp()
         OTP.objects.create(email=email, otp=otp)
-        send_otp_email(email, otp)
+        try:
+            send_otp_email(email, otp)
+        except Exception as e:
+            print(f"Error sending email: {e}")
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
         return Response({'message': 'OTP sent'}, status=status.HTTP_200_OK)
 
 class VerifyOTPView(APIView):
