@@ -43,10 +43,19 @@ class VerifyOTPView(APIView):
     def post(self, request):
         email = request.data.get('email')
         otp = request.data.get('otp')
+        role = request.data.get('role', User.ROLE_CUSTOMER)  # Default to customer if not provided
 
         if not email or not otp:
             return Response(
                 {'error': 'Email and OTP are required'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate role
+        valid_roles = [User.ROLE_CUSTOMER, User.ROLE_BARBER, User.ROLE_ADMIN]
+        if role not in valid_roles:
+            return Response(
+                {'error': f'Invalid role. Must be one of: {", ".join(valid_roles)}'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -71,11 +80,18 @@ class VerifyOTPView(APIView):
         otp_obj.is_used = True
         otp_obj.save()
 
-        # Auto-create customers only; barbers/admins are pre-created by admin
+        # Get or create user with selected role
+        # Note: Barbers should ideally be pre-created by admin, but we allow creation here for flexibility
         user, created = User.objects.get_or_create(
             email=email,
-            defaults={'role': User.ROLE_CUSTOMER},
+            defaults={'role': role},
         )
+        
+        # If user exists but role is barber and user is customer, update role
+        # (Allow role upgrade from customer to barber)
+        if not created and role == User.ROLE_BARBER and user.role == User.ROLE_CUSTOMER:
+            user.role = User.ROLE_BARBER
+            user.save()
 
         refresh = RefreshToken.for_user(user)
 
@@ -83,6 +99,7 @@ class VerifyOTPView(APIView):
             'access': str(refresh.access_token),
             'refresh': str(refresh),
             'role': user.role,
+            'email': user.email,
         }, status=status.HTTP_200_OK)
 
 
